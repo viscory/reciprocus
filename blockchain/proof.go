@@ -14,7 +14,7 @@ import (
 
 // check the hash to se if it meets a set of requirements
 
-const Difficulty = 12
+const Difficulty = 18
 
 type ProofOfWork struct {
     Block *Block
