@@ -6,12 +6,13 @@ import (
     "crypto/rand"
     "crypto/sha256"
     "log"
+    "fmt"
     "golang.org/x/crypto/ripemd160"
 ) 
 
 const (
     checksumLength = 4
-    verion = byte(0x00)
+    version = byte(0x00)
 )
 
 type Wallet struct {
