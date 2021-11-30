@@ -1,7 +1,12 @@
 package blockchain
 
 import (
+    "fmt"
     "github.com/dgraph-io/badger"
+)
+
+const (
+    dbPath = "./tmp/blocks"
 )
 
 type BlockChain struct {
@@ -24,7 +29,7 @@ func InitBlockChain() *BlockChain {
     db, err := badger.Open(opts)
     Handle(err)
 
-    err := db.Update(func(txn, &badger.Txn) error {
+    err = db.Update(func(txn *badger.Txn) error {
         if _,err := txn.Get([]byte("lh")); err == badger.ErrKeyNotFound {
             fmt.Println("No existing blockchain found")
             genesis := Genesis()
@@ -73,7 +78,7 @@ func (chain *BlockChain) AddBlock(data string) {
 }
 
 func (chain *BlockChain) Iterator() *BlockChainIterator {
-    iter := BlockChainIterator{chan.LastHash, chan.Database}
+    iter := &BlockChainIterator{chain.LastHash, chain.Database}
     return iter
 }
 

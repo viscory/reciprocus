@@ -3,6 +3,7 @@ package blockchain
 import (
     "bytes"
     "encoding/gob"
+    "log"
 )
 
 type Block struct {
