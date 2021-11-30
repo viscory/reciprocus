@@ -59,7 +59,6 @@ func (cli *CommandLine) run() {
     case "add":
         err := addBlockCmd.Parse(os.Args[2:])
         blockchain.Handle(err)
-    }
     case "print":
         err := printChainCdm.Parse(os.Args[2:])
         blockchain.Handle(err)
@@ -78,6 +77,7 @@ func (cli *CommandLine) run() {
         if printChainCmd.Parsed() {
             cli.printChain()
         }
+    }
 }
 
 func main() {

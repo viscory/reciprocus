@@ -1,4 +1,4 @@
-module github.com/tensor-programming/golang-blockchain
+module github.com/viscory/reciprocus
 
 go 1.17
 
