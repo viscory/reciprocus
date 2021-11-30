@@ -20,6 +20,22 @@ type Wallet struct {
     PublicKey []byte
 }
 
+func (w Wallet) Address() []byte {
+    pubHash := PublicKeyHash(w.PublicKey)
+
+    versionedHash := append([]byte{version}, pubHash...)
+    checksum := Checksum(versionedHash)
+
+    fullHash := append(versionedHash, checksum...)
+    address := Base58Encode(fullHash)
+
+    fmt.Printf("pub key: %x\n", w.PublicKey)
+    fmt.Printf("pub hash: %x\n", pubHash)
+    fmt.Printf("address: %x\n", address)
+
+    return address
+}
+
 func NewKeyPair() (ecdsa.PrivateKey, []byte) {
     curve := elliptic.P256()
 
@@ -58,18 +74,3 @@ func Checksum(payload []byte) []byte {
     return secondHash[:checksumLength]
 }
 
-func (w Wallet) Address() []byte {
-    pubHash := PublicKeyHash(w.PublicKey)
-
-    versionedHash := append([]byte{version}, pubHash...)
-    checksum := Checksum(versionedHash)
-
-    fullHash := append(versionedHash, checksum...)
-    address := Base58Encode(fullHash)
-
-    fmt.Printf("pub key: %x\n", w.PublicKey)
-    fmt.Printf("pub hash: %x\n", pubHash)
-    fmt.Printf("address: %x\n", address)
-
-    return address
-}

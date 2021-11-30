@@ -2,13 +2,12 @@ package main
 
 import (
     "os"
-    //"github.com/viscory/reciprocus/cli"
-    "github.com/viscory/reciprocus/wallet"
+    "github.com/viscory/reciprocus/cli"
 )
 
 func main() {
     defer os.Exit(0)
-
-    //cli := cli.CommandLine{}
-    //cli.Run()
+    
+    cli := cli.CommandLine{}
+    cli.Run()
 }
