@@ -20,13 +20,13 @@ func CreateWallets() (*Wallets, error) {
     wallets := Wallets{}
     wallets.Wallets = make(map[string]*Wallet)
 
-    err := walles.LoadFile()
+    err := wallets.LoadFile()
 
     return &wallets, err
 }
 
 func (ws *Wallets) AddWallet() string {
-    wallet := MakeWalle()
+    wallet := MakeWallet()
     address := fmt.Sprintf("%s", wallet.Address())
 
     ws.Wallets[address] = wallet
@@ -44,13 +44,13 @@ func (ws *Wallets) GetAllAddresses() []string {
     return addresses
 }
 
-func (ws *Wallets) GetWallet(address string) WAllet {
+func (ws *Wallets) GetWallet(address string) Wallet {
     return *ws.Wallets[address]
 }
 
-func (ws *Wallets) LoadFile() {
+func (ws *Wallets) LoadFile() error {
     if _,err := os.Stat(walletFile); os.IsNotExist(err) {
-        return err
+        log.Panic(err)
     }
     
     var wallets Wallets
@@ -63,7 +63,7 @@ func (ws *Wallets) LoadFile() {
     gob.Register(elliptic.P256())
     decoder := gob.NewDecoder(bytes.NewReader(fileContent))
     err = decoder.Decode(&wallets)
-    if err !- nil {
+    if err != nil {
         return err
     }
      
