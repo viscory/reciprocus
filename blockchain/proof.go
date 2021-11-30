@@ -10,10 +10,6 @@ import (
     "math"
 )
 
-// create a hash of the data plus the counter
-
-// check the hash to se if it meets a set of requirements
-
 const Difficulty = 18
 
 type ProofOfWork struct {
@@ -34,7 +30,7 @@ func (pow *ProofOfWork) InitData(nonce int) []byte {
     data := bytes.Join(
         [][]byte{
             pow.Block.PrevHash,
-            pow.Block.Data,
+            pow.Block.HashTransactions(),
             ToHex(int64(nonce)),
             ToHex(int64(Difficulty)),
         },
