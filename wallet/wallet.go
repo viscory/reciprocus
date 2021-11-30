@@ -5,6 +5,7 @@ import (
     "crypto/elliptic"
     "crypto/rand"
     "crypto/sha256"
+    "bytes"
     "log"
     "golang.org/x/crypto/ripemd160"
 ) 

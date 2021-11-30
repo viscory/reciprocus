@@ -56,8 +56,8 @@ func CoinbaseTx(to, data string) *Transaction {
     }
 
 
-    txin := TxInput{[]byte{}, -1, []byte(data)}
-    txout := NewTXOutput(100, to)
+    txin := TxInput{[]byte{}, -1, nil, []byte(data)}
+    txout := NewTxOutput(100, to)
 
     tx := Transaction{nil, []TxInput{txin}, []TxOutput{*txout}}
     tx.SetID()
@@ -74,7 +74,7 @@ func NewTransaction(from, to string, amount int, chain *BlockChain) *Transaction
     w := wallets.GetWallet(from)
     pubKeyHash := wallet.PublicKeyHash(w.PublicKey)
 
-    acc, validOutputs := chain.FindSpendableOutputs(from, amount)
+    acc, validOutputs := chain.FindSpendableOutputs(pubKeyHash, amount)
 
     if acc < amount {
         log.Panic("Not enough funds")
@@ -85,15 +85,15 @@ func NewTransaction(from, to string, amount int, chain *BlockChain) *Transaction
         Handle(err)
 
         for _, out := range outs {
-            input := TxInput{txID, out, w.PublicKey}
+            input := TxInput{txID, out, nil, w.PublicKey}
             inputs = append(inputs, input)
         }
     }
 
-    outputs = append(outputs, *NewTXOutput(amount, to))
+    outputs = append(outputs, *NewTxOutput(amount, to))
 
     if acc > amount {
-        outputs = append(outputs, *NewTXOutput(acc-amount, from))
+        outputs = append(outputs, *NewTxOutput(acc-amount, from))
     }
 
     tx := Transaction{nil, inputs, outputs}
@@ -108,22 +108,22 @@ func (tx *Transaction) IsCoinBase() bool {
 }
 
 func (tx *Transaction) Sign(privKey ecdsa.PrivateKey, prevTXs map[string]Transaction) {
-    if tx.IsCoinbase() {
+    if tx.IsCoinBase() {
         return
     }
 
     for _, in := range tx.Inputs {
-        if prevTXs[hex.EncodeToString(in.id)].ID== nil {
+        if prevTXs[hex.EncodeToString(in.ID)].ID == nil {
             log.Panic("Previous Transaction Does Not Exist")
         }
     }
 
     txCopy := tx.TrimmedCopy()
 
-    for inId, in := range txCoy.Inputs {
+    for inId, in := range txCopy.Inputs {
         prevTX := prevTXs[hex.EncodeToString(in.ID)]
         txCopy.Inputs[inId].Signature = nil
-        txCopy.Inputs[inId].PubKey = prevTX.Outputs[in.out].PubKeyHash
+        txCopy.Inputs[inId].PubKey = prevTX.Outputs[in.Out].PubKeyHash
         txCopy.ID = txCopy.Hash()
         txCopy.Inputs[inId].PubKey = nil
 
@@ -136,7 +136,7 @@ func (tx *Transaction) Sign(privKey ecdsa.PrivateKey, prevTXs map[string]Transac
 }
 
 func (tx *Transaction) Verify(prevTXs map[string]Transaction) bool {
-    if tx.IsCoinbase() {
+    if tx.IsCoinBase() {
         return true
     }
     
@@ -159,16 +159,16 @@ func (tx *Transaction) Verify(prevTXs map[string]Transaction) bool {
         r := big.Int{}
         s := big.Int{}
         sigLen := len(in.Signature)
-        r.setBytes(in.Signature[:(sigLen/2)])
-        s.setBytes(in.Signature[(sigLen/2):])
+        r.SetBytes(in.Signature[:(sigLen/2)])
+        s.SetBytes(in.Signature[(sigLen/2):])
 
         x := big.Int{}
         y := big.Int{}
-        keyLen - len(in.PubKey)
-        x.setBytes(in.Signature[:(keyLen/2)])
-        y.setBytes(in.Signature[(keyLen/2):])
+        keyLen := len(in.PubKey)
+        x.SetBytes(in.PubKey[:(keyLen/2)])
+        y.SetBytes(in.PubKey[(keyLen/2):])
 
-        rawPubKey := ecdsa.PublicKey{curse, &x, &y}
+        rawPubKey := ecdsa.PublicKey{curve, &x, &y}
         if ecdsa.Verify(&rawPubKey, txCopy.ID, &r, &s) == false {
             return false
         }
@@ -176,31 +176,12 @@ func (tx *Transaction) Verify(prevTXs map[string]Transaction) bool {
     return true
 }
 
-func (bc *BlockChain) FindTransaction(ID []byte) (Transaction, error) {
-    iter := bc.Iterator()
-    
-    for {
-        block := iter.Next()
-
-        for _, tx := range block.Transactions {
-            if bytes.Compare(tx.ID, ID) == 0 {
-                return *tx, nil
-            }           
-        }
-
-        if len(block.PrevHash) == 0 {
-            break
-        }
-    }
-    return Transaction{} , errors.New("Transaction does not exist")
-}
-
 func (tx *Transaction) TrimmedCopy() Transaction {
     var inputs []TxInput
     var outputs []TxOutput
 
     for _, in := range tx.Inputs {
-        inputs = append(inputs, TxInput{in.Id, in.Out, nil, nil})
+        inputs = append(inputs, TxInput{in.ID, in.Out, nil, nil})
     }
     
     for _, out := range tx.Outputs {

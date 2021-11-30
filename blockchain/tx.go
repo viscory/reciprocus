@@ -1,5 +1,10 @@
 package blockchain
 
+import (
+    "bytes"
+    "github.com/viscory/reciprocus/wallet"
+)
+
 type Transaction struct {
     ID []byte
     Inputs []TxInput
@@ -8,7 +13,7 @@ type Transaction struct {
 
 type TxOutput struct {
     Value int
-    PubKeyHash string
+    PubKeyHash []byte
 }
 
 type TxInput struct {
@@ -25,11 +30,8 @@ func NewTxOutput(value int, address string) *TxOutput {
     return txo
 }
 
- 
-
 func (in *TxInput) UsesKey(pubKeyHash []byte) bool {
     lockingHash := wallet.PublicKeyHash(in.PubKey)
-
     return bytes.Compare(lockingHash, pubKeyHash) == 0
 }
 

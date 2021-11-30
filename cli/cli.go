@@ -5,6 +5,7 @@ import (
     "flag"
     "os"
     "runtime"
+    "log"
     "strconv"
     "github.com/viscory/reciprocus/blockchain"
     "github.com/viscory/reciprocus/wallet"
@@ -71,7 +72,7 @@ func (cli *CommandLine) getBalance(address string) {
     defer chain.Database.Close()
 
     balance := 0
-    pubKeyHash := walet.Base58Decode([]byte(address))
+    pubKeyHash := wallet.Base58Decode([]byte(address))
     pubKeyHash = pubKeyHash[1:len(pubKeyHash)-4]
     UTXOs := chain.FindUTXO(pubKeyHash)
 
