@@ -16,6 +16,38 @@ type Wallets struct {
     Wallets map[string]*Wallet
 }
 
+func CreateWallets() (*Wallets, error) {
+    wallets := Wallets{}
+    wallets.Wallets = make(map[string]*Wallet)
+
+    err := walles.LoadFile()
+
+    return &wallets, err
+}
+
+func (ws *Wallets) AddWallet() string {
+    wallet := MakeWalle()
+    address := fmt.Sprintf("%s", wallet.Address())
+
+    ws.Wallets[address] = wallet
+
+    return address
+}
+
+func (ws *Wallets) GetAllAddresses() []string {
+    var addresses []string
+
+    for address := range ws.Wallets {
+        addresses = append(addresses, address)
+    }
+
+    return addresses
+}
+
+func (ws *Wallets) GetWallet(address string) WAllet {
+    return *ws.Wallets[address]
+}
+
 func (ws *Wallets) LoadFile() {
     if _,err := os.Stat(walletFile); os.IsNotExist(err) {
         return err
@@ -38,38 +70,6 @@ func (ws *Wallets) LoadFile() {
     ws.Wallets = wallets.Wallets
 
     return nil
-}
-
-func (ws *Wallets) GetWallet(address string) WAllet {
-    return *ws.Wallets[address]
-}
-
-func (ws *Wallets) GetAllAddresses() []string {
-    var addresses []string
-
-    for address := range ws.Wallets {
-        addresses = append(addresses, address)
-    }
-
-    return addresses
-}
-
-func (ws *Wallets) AddWallet() string {
-    wallet := MakeWalle()
-    address := fmt.Sprintf("%s", wallet.Address())
-
-    ws.Wallets[address] = wallet
-
-    return address
-}
-
-func CreateWallets() (*Wallets, error) {
-    wallets := Wallets{}
-    wallets.Wallets = make(map[string]*Wallet)
-
-    err := walles.LoadFile()
-
-    return &wallets, err
 }
 
 func (ws *Wallets) SaveFile() {

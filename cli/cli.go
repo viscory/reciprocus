@@ -5,9 +5,9 @@ import (
     "flag"
     "os"
     "runtime"
+    "strconv"
     "github.com/viscory/reciprocus/blockchain"
     "github.com/viscory/reciprocus/wallet"
-    "strconv"
 )
 
 type CommandLine struct {
@@ -82,7 +82,7 @@ func (cli *CommandLine) send(from, to string, amount int) {
 
 func (cli *CommandLine) createWallet() {
     wallets, _ := wallet.CreateWallets()
-    addresses := wallets.AddWallet()
+    address := wallets.AddWallet()
     wallets.SaveFile()
 
     fmt.Printf("Your wallet address is: %s\n", address)
@@ -93,7 +93,7 @@ func (cli *CommandLine) listAddresses() {
     wallets, _ := wallet.CreateWallets()
     addresses := wallets.GetAllAddresses()
 
-    for _, address L= range addresses {
+    for _, address := range addresses {
         fmt.Println(address)
     }
 }
