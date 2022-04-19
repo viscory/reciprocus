@@ -235,7 +235,8 @@ func (bc *BlockChain) VerifyTransaction(tx *Transaction) bool {
 	if tx.IsCoinBase() {
 		return true
 	}
-	prevTXs := make(map[string]Transaction)
+	
+    prevTXs := make(map[string]Transaction)
 
 	for _, in := range tx.Inputs {
 		prevTX, err := bc.FindTransaction(in.ID)
