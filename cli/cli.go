@@ -76,7 +76,7 @@ func (cli *CommandLine) getBalance(address string) {
     balance := 0
     pubKeyHash := wallet.Base58Decode([]byte(address))
     pubKeyHash = pubKeyHash[1:len(pubKeyHash)-4]
-    UTXOs := chain.FindUnspentTransactions(pubKeyHash)
+    UTXOs := UTXOSet.FindUTXO(pubKeyHash)
 
     for _, out := range UTXOs {
         balance += out.Value
@@ -122,7 +122,7 @@ func (cli *CommandLine) listAddresses() {
 }
 
 func (cli *CommandLine) reindexUTXO() {
-    chain := blochcian.ContinueBlockChain("")
+    chain := blockchain.ContinueBlockChain("")
     defer chain.Database.Close()
     UTXOSet := blockchain.UTXOSet{chain}
     UTXOSet.Reindex()

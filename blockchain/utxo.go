@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/hex"
 	"log"
-
 	"github.com/dgraph-io/badger"
 )
 
