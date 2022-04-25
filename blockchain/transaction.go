@@ -15,6 +15,9 @@ import (
     "github.com/viscory/reciprocus/wallet"
 )
 
+const (
+    BLOCK_REWARD = 4096
+)
 func (tx Transaction) Serialize() []byte {
     var encoded bytes.Buffer
 
@@ -50,7 +53,7 @@ func CoinbaseTx(to, data string) *Transaction {
 
 
     txin := TxInput{[]byte{}, -1, nil, []byte(data)}
-    txout := NewTxOutput(10, to)
+    txout := NewTxOutput(BLOCK_REWARD, to)
 
     tx := Transaction{nil, []TxInput{txin}, []TxOutput{*txout}}
     tx.ID = tx.Hash()
@@ -58,15 +61,11 @@ func CoinbaseTx(to, data string) *Transaction {
     return &tx
 }
 
-func NewTransaction(from, to string, amount int, UTXO *UTXOSet) *Transaction {
+func NewTransaction(w *wallet.Wallet, to string, amount int, UTXO *UTXOSet) *Transaction {
     var inputs []TxInput
     var outputs []TxOutput
 
-    wallets, err := wallet.CreateWallets()
-    Handle(err)
-    w := wallets.GetWallet(from)
     pubKeyHash := wallet.PublicKeyHash(w.PublicKey)
-
     acc, validOutputs := UTXO.FindSpendableOutputs(pubKeyHash, amount)
 
     if acc < amount {
@@ -82,6 +81,8 @@ func NewTransaction(from, to string, amount int, UTXO *UTXOSet) *Transaction {
             inputs = append(inputs, input)
         }
     }
+
+    from := fmt.Sprintf("%s", w.Address())
 
     outputs = append(outputs, *NewTxOutput(amount, to))
 
