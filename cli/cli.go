@@ -26,7 +26,7 @@ func (cli *CommandLine) printUsage() {
     fmt.Println(" createwallet - create new wallet")
     fmt.Println(" getalwallets - lists all wallets inside wallet file")
     fmt.Println(" reindexutxo - reindexes utxo set")
-    fmt.Println(" startminer -miner ADDRESS - start a node with id specified as $NODE_ID")
+    fmt.Println(" startnode -miner ADDRESS -sincerity SINCERITY - start a node with id specified as $NODE_ID")
 }
 
 func (cli *CommandLine) validateArgs() {
@@ -104,14 +104,14 @@ func (cli *CommandLine) send(from, to string, amount int, nodeId string, mineNow
     defer chain.Database.Close() 
 
     wallets, err := wallet.CreateWallets(nodeId)
+    //    fmt.Println("test")
     if err != nil {
         log.Panic(err)
     }
     wallet := wallets.GetWallet(from)
-
     tx := blockchain.NewTransaction(&wallet, to, amount, &UTXOSet)
     if mineNow {
-        cbTx := blockchain.CoinbaseTx(from, "")
+        cbTx := blockchain.CoinbaseTx(from, "", 0)
         txs := []*blockchain.Transaction{cbTx, tx}
         block := chain.MineBlock(txs)
         UTXOSet.Update(block)
@@ -151,7 +151,7 @@ func (cli *CommandLine) reindexUTXO(nodeId string) {
     fmt.Printf("Done! There are %d transactions in the UTXO set.\n", count)
 }
 
-func (cli *CommandLine) StartNode(nodeId, minerAddress string) {
+func (cli *CommandLine) StartNode(nodeId, minerAddress string, sincerity int) {
     fmt.Printf("Starting Node %s\n", nodeId)
 
     if len(minerAddress) > 0 {
@@ -161,7 +161,7 @@ func (cli *CommandLine) StartNode(nodeId, minerAddress string) {
             log.Panic("Invalid miner address")
         }
     }
-    network.StartServer(nodeId, minerAddress)
+    network.StartServer(nodeId, minerAddress, sincerity)
 }
 
 func (cli *CommandLine) Run() {
@@ -189,6 +189,7 @@ func (cli *CommandLine) Run() {
     sendAmount := sendCmd.Int("amount", 0, "Amount to send")
     sendMine := sendCmd.Bool("mine", false, "mine immediately on the same node")
     startNodeMiner := startNodeCmd.String("miner", "", "Enable mining mode and send reward to address")
+    sincerityLevel := startNodeCmd.Int("sincerity", 0, "set sincerity level for mining")
 
     switch os.Args[1] {
     case "getbalance":
@@ -258,12 +259,7 @@ func (cli *CommandLine) Run() {
         cli.reindexUTXO(nodeId)
     }
     if startNodeCmd.Parsed() {
-        nodeId := os.Getenv("NODE_ID")
-        if nodeId == "" {
-            startNodeCmd.Usage()
-            runtime.Goexit()
-        }
-        cli.StartNode(nodeId, *startNodeMiner)
+        cli.StartNode(nodeId, *startNodeMiner, *sincerityLevel)
     }
 
 }

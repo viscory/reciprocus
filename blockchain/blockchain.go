@@ -43,8 +43,8 @@ func ContinueBlockChain(nodeId string) *BlockChain {
 	}
 
 	opts := badger.DefaultOptions
-	opts.Dir = dbPath
-	opts.ValueDir = dbPath
+	opts.Dir = path
+	opts.ValueDir = path
 
     db, err := openDB(path, opts)
 	Handle(err) 
@@ -53,13 +53,10 @@ func ContinueBlockChain(nodeId string) *BlockChain {
 		item, err := txn.Get([]byte("lh"))
 		Handle(err)
 		lastHash, err = item.Value()
-
 		return err
 	})
 	Handle(err)
-
 	chain := BlockChain{lastHash, db}
-
 	return &chain
 }
 
@@ -79,7 +76,7 @@ func InitBlockChain(address, nodeId string) *BlockChain {
 	Handle(err)
 
 	err = db.Update(func(txn *badger.Txn) error {
-		cbtx := CoinbaseTx(address, genesisData)
+		cbtx := CoinbaseTx(address, genesisData, 0)
 		genesis := Genesis(cbtx)
 		fmt.Println("Genesis created")
 		err = txn.Set(genesis.Hash, genesis.Serialize())
@@ -162,7 +159,6 @@ func (chain *BlockChain) MineBlock(transactions []*Transaction) *Block {
         lastBlockData, _ := item.Value()
         lastBlock := Deserialize(lastBlockData)
         lastHeight = lastBlock.Height
-
 		return err
 	})
 	Handle(err)
@@ -173,13 +169,10 @@ func (chain *BlockChain) MineBlock(transactions []*Transaction) *Block {
 		err := txn.Set(newBlock.Hash, newBlock.Serialize())
 		Handle(err)
 		err = txn.Set([]byte("lh"), newBlock.Hash)
-
 		chain.LastHash = newBlock.Hash
-
 		return err
 	})
 	Handle(err)
-
 	return newBlock
 }
 
@@ -288,15 +281,6 @@ func (bc *BlockChain) VerifyTransaction(tx *Transaction) bool {
 	}
 
 	return tx.Verify(prevTXs)
-}
-
-func DeserializeTransactions(data []byte) Transaction {
-    var transaction Transaction
-
-    decoder := gob.NewDecoder(bytes.NewReader(data))
-    err := decoder.Decode(&transaction)
-    Handle(err)
-    return transaction
 }
 
 func retry(dir string, originalOpts badger.Options) (*badger.DB, error) {

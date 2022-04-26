@@ -51,7 +51,7 @@ func (ws *Wallets) GetWallet(address string) Wallet {
 func (ws *Wallets) LoadFile(nodeId string) error {
     walletFile := fmt.Sprintf(walletFile, nodeId)
     if _,err := os.Stat(walletFile); os.IsNotExist(err) {
-        log.Panic(err)
+        os.OpenFile(walletFile, os.O_RDONLY|os.O_CREATE, 0666)
     }
     
     var wallets Wallets
@@ -69,7 +69,6 @@ func (ws *Wallets) LoadFile(nodeId string) error {
     }
      
     ws.Wallets = wallets.Wallets
-
     return nil
 }
 
@@ -81,7 +80,6 @@ func (ws *Wallets) SaveFile(nodeId string) {
 
     encoder := gob.NewEncoder(&content)
     err := encoder.Encode(ws)
-
     if err!= nil {
         log.Panic(err)
     }

@@ -6,6 +6,7 @@ import (
     "log"
     "strings"
     "math/big"
+    "math"
     "crypto/sha256"
     "crypto/ecdsa"
     "crypto/elliptic"
@@ -18,6 +19,7 @@ import (
 const (
     BLOCK_REWARD = 4096
 )
+
 func (tx Transaction) Serialize() []byte {
     var encoded bytes.Buffer
 
@@ -28,6 +30,15 @@ func (tx Transaction) Serialize() []byte {
     }
 
     return encoded.Bytes()
+}
+
+func DeserializeTransactions(data []byte) Transaction {
+    var transaction Transaction
+
+    decoder := gob.NewDecoder(bytes.NewReader(data))
+    err := decoder.Decode(&transaction)
+    Handle(err)
+    return transaction
 }
 
 func (tx *Transaction) Hash() []byte {
@@ -41,7 +52,7 @@ func (tx *Transaction) Hash() []byte {
     return hash[:]
 }
 
-func CoinbaseTx(to, data string) *Transaction {
+func CoinbaseTx(to, data string, sincerity int) *Transaction {
     if data == "" {
         randData := make([]byte, 24)
         _, err := rand.Read(randData)
@@ -53,7 +64,7 @@ func CoinbaseTx(to, data string) *Transaction {
 
 
     txin := TxInput{[]byte{}, -1, nil, []byte(data)}
-    txout := NewTxOutput(BLOCK_REWARD, to)
+    txout := NewTxOutput(int(math.Pow(2, -1*float64(sincerity))*BLOCK_REWARD), to)
 
     tx := Transaction{nil, []TxInput{txin}, []TxOutput{*txout}}
     tx.ID = tx.Hash()
@@ -181,9 +192,7 @@ func (tx *Transaction) TrimmedCopy() Transaction {
     for _, out := range tx.Outputs {
         outputs = append(outputs, TxOutput{out.Value, out.PubKeyHash})
     }
-
     txCopy := Transaction{tx.ID, inputs, outputs}
-
     return txCopy
 }
 

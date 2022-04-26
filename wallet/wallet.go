@@ -32,16 +32,6 @@ func (w Wallet) Address() []byte {
     return address
 }
 
-func ValidateAddress(address string) bool {
-    pubKeyHash := Base58Decode([]byte(address))
-    actualChecksum := pubKeyHash[len(pubKeyHash)-checksumLength:]
-    version := pubKeyHash[0]
-    pubKeyHash = pubKeyHash[1:len(pubKeyHash)-checksumLength]
-    targetChecksum := Checksum(append([]byte{version}, pubKeyHash...))
-
-    return bytes.Compare(actualChecksum, targetChecksum) == 0
-}
-
 func NewKeyPair() (ecdsa.PrivateKey, []byte) {
     curve := elliptic.P256()
 
@@ -78,5 +68,15 @@ func Checksum(payload []byte) []byte {
     secondHash := sha256.Sum256(firstHash[:])
 
     return secondHash[:checksumLength]
+}
+
+func ValidateAddress(address string) bool {
+    pubKeyHash := Base58Decode([]byte(address))
+    actualChecksum := pubKeyHash[len(pubKeyHash)-checksumLength:]
+    version := pubKeyHash[0]
+    pubKeyHash = pubKeyHash[1:len(pubKeyHash)-checksumLength]
+    targetChecksum := Checksum(append([]byte{version}, pubKeyHash...))
+
+    return bytes.Compare(actualChecksum, targetChecksum) == 0
 }
 
