@@ -6,12 +6,6 @@ import (
     "encoding/gob"
 )
 
-type Transaction struct {
-    ID []byte
-    Inputs []TxInput
-    Outputs []TxOutput
-}
-
 type TxOutput struct {
     Value int
     PubKeyHash []byte

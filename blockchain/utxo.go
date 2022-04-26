@@ -92,34 +92,24 @@ func (u UTXOSet) CountTransactions() int {
 		for it.Seek(utxoPrefix); it.ValidForPrefix(utxoPrefix); it.Next() {
 			counter++
 		}
-
 		return nil
 	})
-
 	Handle(err)
-
 	return counter
 }
 
 func (u UTXOSet) Reindex() {
 	db := u.Blockchain.Database
-
 	u.DeleteByPrefix(utxoPrefix)
-
 	UTXO := u.Blockchain.FindUTXO()
-
 	err := db.Update(func(txn *badger.Txn) error {
 		for txId, outs := range UTXO {
 			key, err := hex.DecodeString(txId)
-			if err != nil {
-				return err
-			}
+			Handle(err)
 			key = append(utxoPrefix, key...)
-
 			err = txn.Set(key, outs.Serialize())
 			Handle(err)
 		}
-
 		return nil
 	})
 	Handle(err)
@@ -140,7 +130,6 @@ func (u *UTXOSet) Update(block *Block) {
 					Handle(err)
 
 					outs := DeserializeOutputs(v)
-
 					for outIdx, out := range outs.Outputs {
 						if outIdx != in.Out {
 							updatedOuts.Outputs = append(updatedOuts.Outputs, out)

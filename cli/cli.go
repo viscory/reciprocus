@@ -64,7 +64,7 @@ func (cli *CommandLine) createBlockChain(address, nodeId string) {
         log.Panic("Address is not Valid")
     }
     chain := blockchain.InitBlockChain(address, nodeId)
-    chain.Database.Close()
+    defer chain.Database.Close()
 
     UTXOSet := blockchain.UTXOSet{chain}
     UTXOSet.Reindex()

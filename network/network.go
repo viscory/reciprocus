@@ -229,7 +229,6 @@ func SendData(addr string, data[]byte) {
     conn, err := net.Dial(protocol, addr)
 
     if err != nil {
-        log.Panic(err)
         fmt.Printf("%s is not available\n", addr)
         var updatedNodes []string
 
@@ -255,7 +254,6 @@ func HandleAddr(request []byte) {
     buff.Write(request[commandLength:])
     dec := gob.NewDecoder(&buff)
     err := dec.Decode(&payload)
-
     if err != nil {
         log.Panic(err)
     }
@@ -429,10 +427,10 @@ func HandleVersion(request []byte, chain *blockchain.BlockChain) {
 func HandleConnection(conn net.Conn, chain *blockchain.BlockChain, sincerity int) {
     req, err := ioutil.ReadAll(conn)
     defer conn.Close()
-
     if err != nil {
         log.Panic(err)
     }
+    
     command := BytesToCmd(req[:commandLength])
     fmt.Printf("Received %s command\n", command)
 

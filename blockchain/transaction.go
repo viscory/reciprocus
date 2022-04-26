@@ -20,6 +20,12 @@ const (
     BLOCK_REWARD = 4096
 )
 
+type Transaction struct {
+    ID []byte
+    Inputs []TxInput
+    Outputs []TxOutput
+}
+
 func (tx Transaction) Serialize() []byte {
     var encoded bytes.Buffer
 

@@ -5,7 +5,6 @@ import (
 	
     "crypto/ecdsa"
 	"encoding/hex"
-	"encoding/gob"
     "path/filepath"
 	
     "bytes"
@@ -85,7 +84,6 @@ func InitBlockChain(address, nodeId string) *BlockChain {
 		lastHash = genesis.Hash
 		return err
 	})
-
 	Handle(err)
 
 	blockchain := BlockChain{lastHash, db}
