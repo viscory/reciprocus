@@ -1,1 +1,1 @@
-need to fill this
+Technically a fork of another project. A limited re-implementation of primitive-BTC with a reworked rewarding mechanism to rid the use of mining pools. This was meant to be an implementation of Proof of Sincerity.
